@@ -6,15 +6,15 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [SerializeField]
-    private float speed = 20;
+    protected float speed = 20;
 
-    private Rigidbody rb;
+    protected Rigidbody rb;
 
-	private void Awake() {
+	protected virtual void Awake() {
 		rb = GetComponent<Rigidbody>();
 	}
 
-	private void OnEnable() {
+	protected virtual void OnEnable() {
 		rb.velocity = transform.forward * speed;
 	}
 }
