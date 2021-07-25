@@ -264,7 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 515ef50029702974ba31c497d409883f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 8176244383310283944, guid: a19ffd2087a091e4f96ccf6e4d31b292, type: 3}
+  initialCapacity: 100
+  maxCapacity: 500
 --- !u!65 &545309169
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -497,10 +499,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8c39aaa2ae405540b37c76a362ec0da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 8176244383310283944, guid: a19ffd2087a091e4f96ccf6e4d31b292, type: 3}
-  fireRate: 0.5
+  projectileSource: {fileID: 545309168}
+  fireRate: 0.2
   centerOffset: {x: 0, y: 0, z: 0}
-  radius: 0
+  offsetRadius: 0
+  offsetRotation: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   rotationSpeed: 0
   rotationRange: 0
   rotateClockwise: 1

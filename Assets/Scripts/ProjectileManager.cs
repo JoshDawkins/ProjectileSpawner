@@ -7,17 +7,24 @@ public class ProjectileManager : MonoBehaviour
 {
     [SerializeField]
     private Projectile projectilePrefab = null;
+	[SerializeField]
+	private int initialCapacity = 100,
+		maxCapacity = 500;
 
     private ObjectPool<Projectile> pool;
 
 	private void OnEnable() {
 		//Create a pool of these projectiles
 		pool = new ObjectPool<Projectile>(
-			() => Instantiate(projectilePrefab),
+			() => {
+				Projectile p = Instantiate(projectilePrefab);
+				p.Manager = this;
+				return p;
+			},
 			(p) => p.gameObject.SetActive(true),
 			(p) => p.gameObject.SetActive(false),
 			(p) => Destroy(gameObject),
-			true, 100, 500
+			true, initialCapacity, maxCapacity
 		);
 	}
 
@@ -25,7 +32,20 @@ public class ProjectileManager : MonoBehaviour
 		pool.Dispose();
 	}
 
-	private void OnTriggerEnter(Collider other) {
-		//How can I check if the other object belongs to this pool?
+	private void OnTriggerExit(Collider other) {
+		//Confirm that the exiting object is a projectile that belongs to this manager
+		Projectile p = other.GetComponent<Projectile>();
+		if (p == null || p.Manager != this)
+			return;
+
+		pool.Release(p);
+	}
+
+	public Projectile SpawnProjectile(Vector3 position, Quaternion rotation) {
+		Projectile p = pool.Get();
+		p.transform.position = position;
+		p.transform.rotation = rotation;
+
+		return p;
 	}
 }

@@ -8,7 +8,9 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     protected float speed = 20;
 
-    protected Rigidbody rb;
+	public ProjectileManager Manager { get; set; }
+
+	protected Rigidbody rb;
 
 	protected virtual void Awake() {
 		rb = GetComponent<Rigidbody>();
