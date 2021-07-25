@@ -501,6 +501,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileSource: {fileID: 545309168}
   fireRate: 0.2
+  startDelay: 0
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0
   offsetRotation: 0
@@ -518,5 +519,5 @@ MonoBehaviour:
   sweepRange: 0
   sweepClockwise: 1
   burstFire: 0
-  shotsPerBursts: 1
+  shotsPerBurst: 1
   timeBetweenBursts: 0

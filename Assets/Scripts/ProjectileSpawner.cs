@@ -10,6 +10,9 @@ public class ProjectileSpawner : MonoBehaviour
 	[SerializeField]
 	[Min(.01f)]
 	private float fireRate = 0.2f;
+	[SerializeField]
+	[Min(0)]
+	private float startDelay = 0;
 
 	#region OFFSET
 	[Header("Offset")]
@@ -79,7 +82,7 @@ public class ProjectileSpawner : MonoBehaviour
 	private bool burstFire = false;
 	[SerializeField]
 	[Min(1)]
-	private int shotsPerBursts = 1;
+	private int shotsPerBurst = 1;
 	[SerializeField]
 	[Min(0)]
 	private float timeBetweenBursts = 0;
@@ -99,8 +102,14 @@ public class ProjectileSpawner : MonoBehaviour
 	#endregion SETUP
 
 	private IEnumerator Shoot() {
+		//Initial delay
+		if (startDelay > 0)
+			yield return new WaitForSeconds(startDelay);
+		
+		//Instantiate some variables to use
 		Quaternion rot;
-		Vector3 offset = Vector3.zero;
+		Vector3 offset;
+		int shotsThisBurst = 0;
 
 		while (true) {
 			rot = Quaternion.AngleAxis(offsetRotation, Vector3.up);
@@ -111,7 +120,11 @@ public class ProjectileSpawner : MonoBehaviour
 			projectileSource.SpawnProjectile(transform.position + centerOffset + (rot * offset), transform.rotation * rot);
 
 			//Delay before the next shot
-			yield return new WaitForSeconds(fireRate);
+			if (burstFire && ++shotsThisBurst >= shotsPerBurst) {
+				yield return new WaitForSeconds(timeBetweenBursts);
+				shotsThisBurst = 0;
+			} else
+				yield return new WaitForSeconds(fireRate);
 		}
 	}
 
