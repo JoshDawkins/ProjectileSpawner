@@ -22,8 +22,9 @@ public class ProjectileSpawner : MonoBehaviour
 	[Min(0)]
 	private float offsetRadius = 0;
 	[SerializeField]
-	[Range(0, 360)]
-	private float offsetRotation = 0;
+	[Range(-180, 180)]
+	private float offsetStartAngle = 0,
+		rotationFromOffset = 0;
 	[SerializeField]
 	private Color editorColor = Color.red;
 	#endregion OFFSET
@@ -31,7 +32,7 @@ public class ProjectileSpawner : MonoBehaviour
 	#region ROTATION
 	[Header("Rotation")]
 	[SerializeField]
-	[Range(-360, 360)]
+	[Range(-720, 720)]
 	private float rotationSpeed = 0;
 	[SerializeField]
 	[Range(-360, 360)]
@@ -67,13 +68,12 @@ public class ProjectileSpawner : MonoBehaviour
 	#region SWEEP FIRE
 	[Header("Sweep Fire")]
 	[SerializeField]
-	[Range(0, 360)]
+	[Range(-720, 720)]
 	private float sweepSpeed = 0;
 	[SerializeField]
-	[Range(0, 360)]
-	private float sweepRange = 0;
-	[SerializeField]
-	private bool sweepClockwise = true;
+	[Range(-360, 360)]
+	private float sweepRangeMin = -30,
+		sweepRangeMax = 30;
 	#endregion SWEEP FIRE
 
 	#region BURST FIRE
@@ -107,10 +107,11 @@ public class ProjectileSpawner : MonoBehaviour
 			yield return new WaitForSeconds(startDelay);
 
 		//Instantiate some variables to use
-		Quaternion rot = Quaternion.Euler(0, offsetRotation, 0);
+		Quaternion rotation, sweepAngle;
 		Vector3 offset;
 		int shotsThisBurst = 0;
-		float currentAngle = offsetRotation;
+		float currentRotation = offsetStartAngle,
+			currentSweepAngle = rotationFromOffset;
 
 		while (true) {
 			offset.x = offset.y = 0;
@@ -121,37 +122,57 @@ public class ProjectileSpawner : MonoBehaviour
 				rotationRangeMin = rotationRangeMax;
 				rotationRangeMax = temp;
 			}
+			if (sweepRangeMax < sweepRangeMin) {
+				//Make sure the min is actualy less than the max
+				var temp = sweepRangeMin;
+				sweepRangeMin = sweepRangeMax;
+				sweepRangeMax = temp;
+			}
 
 			//Rotation
 			if (rotationSpeed == 0) {
-				rot = Quaternion.Euler(0, offsetRotation, 0);
-				currentAngle = offsetRotation;
+				currentRotation = offsetStartAngle;
 			} else {
-				currentAngle += rotationSpeed * fireRate;
+				currentRotation += rotationSpeed * fireRate;
 
-				if (currentAngle > rotationRangeMax) {
+				if (currentRotation > rotationRangeMax) {
 					//Went above the max range
 					if (pingPong) {
-						currentAngle = rotationRangeMax - (currentAngle - rotationRangeMax);
+						currentRotation = rotationRangeMax - (currentRotation - rotationRangeMax);
 						rotationSpeed *= -1;
 					} else {
-						currentAngle = rotationRangeMin + (currentAngle - rotationRangeMax);
+						currentRotation = rotationRangeMin + (currentRotation - rotationRangeMax);
 					}
-				} else if (currentAngle < rotationRangeMin) {
+				} else if (currentRotation < rotationRangeMin) {
 					//Went below the min range
 					if (pingPong) {
-						currentAngle = rotationRangeMin + (rotationRangeMin - currentAngle);
+						currentRotation = rotationRangeMin + (rotationRangeMin - currentRotation);
 						rotationSpeed *= -1;
 					} else {
-						currentAngle = rotationRangeMax - (rotationRangeMin - currentAngle);
+						currentRotation = rotationRangeMax - (rotationRangeMin - currentRotation);
 					}
 				}
-
-				rot.eulerAngles = new Vector3(0, currentAngle, 0);
 			}
+			rotation = Quaternion.Euler(0, currentRotation, 0);
+
+			//Sweep
+			if (sweepSpeed == 0) {
+				currentSweepAngle = rotationFromOffset;
+			} else {
+				currentSweepAngle += sweepSpeed * fireRate;
+
+				if (currentSweepAngle > sweepRangeMax) {
+					currentSweepAngle = sweepRangeMax - (currentSweepAngle - sweepRangeMax);
+					sweepSpeed *= -1;
+				} else if (currentSweepAngle < sweepRangeMin) {
+					currentSweepAngle = sweepRangeMin + (sweepRangeMin - currentSweepAngle);
+					sweepSpeed *= -1;
+				}
+			}
+			sweepAngle = Quaternion.Euler(0, currentSweepAngle, 0);
 
 			//Fire a projectile
-			projectileSource.SpawnProjectile(transform.position + centerOffset + (rot * offset), transform.rotation * rot);
+			projectileSource.SpawnProjectile(transform.position + centerOffset + (rotation * offset), transform.rotation * rotation * sweepAngle);
 
 			//Delay before the next shot
 			if (burstFire && ++shotsThisBurst >= shotsPerBurst) {
@@ -172,7 +193,7 @@ public class ProjectileSpawner : MonoBehaviour
 
 		Gizmos.DrawSphere(center, 0.1f);
 		Gizmos.DrawWireSphere(center, offsetRadius);
-		Gizmos.DrawSphere(center + (Quaternion.Euler(0, offsetRotation, 0) * radVec), 0.05f);
+		Gizmos.DrawSphere(center + (Quaternion.Euler(0, offsetStartAngle, 0) * radVec), 0.05f);
 
 		Gizmos.DrawLine(center + (min * (radVec + Vector3.forward * -0.2f)), center + (min * (radVec + Vector3.forward * 0.2f)));
 		Gizmos.DrawLine(center + (max * (radVec + Vector3.forward * -0.2f)), center + (max * (radVec + Vector3.forward * 0.2f)));
