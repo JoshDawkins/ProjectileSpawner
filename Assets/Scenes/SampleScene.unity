@@ -504,7 +504,8 @@ MonoBehaviour:
   startDelay: 0
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0
-  offsetRotation: 0
+  offsetStartAngle: 0
+  rotationFromOffset: 0
   editorColor: {r: 1, g: 0, b: 0, a: 1}
   rotationSpeed: 0
   rotationRangeMin: 0
@@ -516,8 +517,8 @@ MonoBehaviour:
   coneAngle: 0
   coneTipWidth: 0
   sweepSpeed: 0
-  sweepRange: 0
-  sweepClockwise: 1
+  sweepRangeMin: -30
+  sweepRangeMax: 30
   burstFire: 0
   shotsPerBurst: 1
   timeBetweenBursts: 0

@@ -114,8 +114,6 @@ public class ProjectileSpawner : MonoBehaviour
 			currentSweepAngle = rotationFromOffset;
 
 		while (true) {
-			offset.x = offset.y = 0;
-			offset.z = offsetRadius;
 			if (rotationRangeMax < rotationRangeMin) {
 				//Make sure the min is actually less than the max
 				var temp = rotationRangeMin;
@@ -154,6 +152,7 @@ public class ProjectileSpawner : MonoBehaviour
 				}
 			}
 			rotation = Quaternion.Euler(0, currentRotation, 0);
+			offset = transform.position + centerOffset + (rotation * (Vector3.forward * offsetRadius));
 
 			//Sweep
 			if (sweepSpeed == 0) {
@@ -162,17 +161,32 @@ public class ProjectileSpawner : MonoBehaviour
 				currentSweepAngle += sweepSpeed * fireRate;
 
 				if (currentSweepAngle > sweepRangeMax) {
+					//Went above the max range
 					currentSweepAngle = sweepRangeMax - (currentSweepAngle - sweepRangeMax);
 					sweepSpeed *= -1;
 				} else if (currentSweepAngle < sweepRangeMin) {
+					//Went below the min range
 					currentSweepAngle = sweepRangeMin + (sweepRangeMin - currentSweepAngle);
 					sweepSpeed *= -1;
 				}
 			}
-			sweepAngle = Quaternion.Euler(0, currentSweepAngle, 0);
+			sweepAngle = transform.rotation * rotation * Quaternion.Euler(0, currentSweepAngle, 0);
 
-			//Fire a projectile
-			projectileSource.SpawnProjectile(transform.position + centerOffset + (rotation * offset), transform.rotation * rotation * sweepAngle);
+			//Fire the projectiles
+			if (coneStreams == 1) {
+				projectileSource.SpawnProjectile(offset, sweepAngle);
+			} else {
+				float per = coneTipWidth / (coneStreams - 1),
+					halfWidth = coneTipWidth / 2,
+					anglePer = coneAngle / (coneStreams - 1),
+					halfAngle = coneAngle / 2;
+				for (int i = 0; i < coneStreams; i++) {
+					projectileSource.SpawnProjectile(
+						offset + (rotation * Vector3.right * (per * i - halfWidth)),
+						sweepAngle * Quaternion.Euler(0, anglePer * i - halfAngle, 0)
+					);
+				}
+			}
 
 			//Delay before the next shot
 			if (burstFire && ++shotsThisBurst >= shotsPerBurst) {
