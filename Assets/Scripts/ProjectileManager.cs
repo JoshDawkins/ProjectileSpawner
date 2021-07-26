@@ -16,15 +16,17 @@ public class ProjectileManager : MonoBehaviour
 	private void OnEnable() {
 		//Create a pool of these projectiles
 		pool = new ObjectPool<Projectile>(
-			() => {
+			createFunc: () => {
 				Projectile p = Instantiate(projectilePrefab);
 				p.Manager = this;
 				return p;
 			},
-			(p) => p.gameObject.SetActive(true),
-			(p) => p.gameObject.SetActive(false),
-			(p) => Destroy(gameObject),
-			true, initialCapacity, maxCapacity
+			actionOnGet: (p) => p.gameObject.SetActive(true),
+			actionOnRelease: (p) => p.gameObject.SetActive(false),
+			actionOnDestroy: (p) => Destroy(gameObject),
+			collectionCheck: true,
+			defaultCapacity: initialCapacity,
+			maxSize: maxCapacity
 		);
 	}
 
@@ -43,8 +45,7 @@ public class ProjectileManager : MonoBehaviour
 
 	public Projectile SpawnProjectile(Vector3 position, Quaternion rotation) {
 		Projectile p = pool.Get();
-		p.transform.position = position;
-		p.transform.rotation = rotation;
+		p.ResetProjectile(position, rotation);
 
 		return p;
 	}

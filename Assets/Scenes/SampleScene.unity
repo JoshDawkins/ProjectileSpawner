@@ -507,9 +507,9 @@ MonoBehaviour:
   offsetRotation: 0
   editorColor: {r: 1, g: 0, b: 0, a: 1}
   rotationSpeed: 0
-  rotationRange: 0
-  rotateClockwise: 1
-  pingPong: 1
+  rotationRangeMin: 0
+  rotationRangeMax: 360
+  pingPong: 0
   spawnDirections: 1
   multiDirAngle: 0
   coneStreams: 1

@@ -16,7 +16,11 @@ public class Projectile : MonoBehaviour
 		rb = GetComponent<Rigidbody>();
 	}
 
-	protected virtual void OnEnable() {
+	//This would be OnEnable, but the pool refuses to actually call OnEnable consistently
+	public virtual void ResetProjectile(Vector3 position, Quaternion rotation) {
+		transform.position = position;
+		transform.rotation = rotation;
+
 		rb.velocity = transform.forward * speed;
 	}
 }
