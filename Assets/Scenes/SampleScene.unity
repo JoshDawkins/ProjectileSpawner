@@ -511,8 +511,8 @@ MonoBehaviour:
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnDirections: 1
-  multiDirAngle: 0
+  spawnRotations:
+  - 0
   coneStreams: 1
   coneAngle: 0
   coneTipWidth: 0

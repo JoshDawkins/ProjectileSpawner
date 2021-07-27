@@ -45,11 +45,8 @@ public class ProjectileSpawner : MonoBehaviour
 	#region MULTIDIRECTIONAL FIRE
 	[Header("Multidirectional Fire")]
 	[SerializeField]
-	[Min(1)]
-	private int spawnDirections = 1;
-	[SerializeField]
-	[Range(0, 360)]
-	private float multiDirAngle = 0;
+	[Range(-180, 180)]
+	private float[] spawnRotations = { 0 };
 	#endregion MULTIDIRECTIONAL FIRE
 
 	#region CONE FIRE
@@ -107,12 +104,12 @@ public class ProjectileSpawner : MonoBehaviour
 			yield return new WaitForSeconds(startDelay);
 
 		//Instantiate some variables to use
-		Quaternion rotation, sweepAngle;
-		Vector3 offset;
+		Quaternion rotation;
 		int shotsThisBurst = 0;
 		float currentRotation = offsetStartAngle,
 			currentSweepAngle = rotationFromOffset;
 
+		//Just keep shooting forever until OnDisable stops the coroutine
 		while (true) {
 			if (rotationRangeMax < rotationRangeMin) {
 				//Make sure the min is actually less than the max
@@ -152,7 +149,6 @@ public class ProjectileSpawner : MonoBehaviour
 				}
 			}
 			rotation = Quaternion.Euler(0, currentRotation, 0);
-			offset = transform.position + centerOffset + (rotation * (Vector3.forward * offsetRadius));
 
 			//Sweep
 			if (sweepSpeed == 0) {
@@ -170,23 +166,10 @@ public class ProjectileSpawner : MonoBehaviour
 					sweepSpeed *= -1;
 				}
 			}
-			sweepAngle = transform.rotation * rotation * Quaternion.Euler(0, currentSweepAngle, 0);
 
 			//Fire the projectiles
-			if (coneStreams == 1) {
-				projectileSource.SpawnProjectile(offset, sweepAngle);
-			} else {
-				float per = coneTipWidth / (coneStreams - 1),
-					halfWidth = coneTipWidth / 2,
-					anglePer = coneAngle / (coneStreams - 1),
-					halfAngle = coneAngle / 2;
-				for (int i = 0; i < coneStreams; i++) {
-					projectileSource.SpawnProjectile(
-						offset + (rotation * Vector3.right * (per * i - halfWidth)),
-						sweepAngle * Quaternion.Euler(0, anglePer * i - halfAngle, 0)
-					);
-				}
-			}
+			foreach (float rot in spawnRotations)
+				FireOneDirection(rotation * Quaternion.Euler(0, rot, 0), currentSweepAngle);
 
 			//Delay before the next shot
 			if (burstFire && ++shotsThisBurst >= shotsPerBurst) {
@@ -194,6 +177,26 @@ public class ProjectileSpawner : MonoBehaviour
 				shotsThisBurst = 0;
 			} else
 				yield return new WaitForSeconds(fireRate);
+		}
+	}
+
+	private void FireOneDirection(Quaternion rotation, float currentSweepAngle) {
+		Vector3 offset = transform.position + centerOffset + (rotation * (Vector3.forward * offsetRadius));
+		Quaternion sweepAngle = transform.rotation * rotation * Quaternion.Euler(0, currentSweepAngle, 0);
+
+		if (coneStreams == 1) {
+			projectileSource.SpawnProjectile(offset, sweepAngle);
+		} else {
+			float per = coneTipWidth / (coneStreams - 1),
+				halfWidth = coneTipWidth / 2,
+				anglePer = coneAngle / (coneStreams - 1),
+				halfAngle = coneAngle / 2;
+			for (int i = 0; i < coneStreams; i++) {
+				projectileSource.SpawnProjectile(
+					offset + (rotation * Vector3.right * (per * i - halfWidth)),
+					sweepAngle * Quaternion.Euler(0, anglePer * i - halfAngle, 0)
+				);
+			}
 		}
 	}
 
