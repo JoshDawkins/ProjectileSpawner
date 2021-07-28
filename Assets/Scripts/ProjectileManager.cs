@@ -40,7 +40,7 @@ public class ProjectileManager : MonoBehaviour
 		if (p == null || p.Manager != this)
 			return;
 
-		pool.Release(p);
+		DespawnProjectile(p);
 	}
 
 	public Projectile SpawnProjectile(Vector3 position, Quaternion rotation) {
@@ -48,5 +48,9 @@ public class ProjectileManager : MonoBehaviour
 		p.ResetProjectile(position, rotation);
 
 		return p;
+	}
+
+	public void DespawnProjectile(Projectile p) {
+		pool.Release(p);
 	}
 }
