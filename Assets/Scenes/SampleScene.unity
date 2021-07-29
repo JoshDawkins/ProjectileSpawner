@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.43667546, g: 0.48427135, b: 0.5645225, a: 1}
+  m_IndirectSpecularColor: {r: 0.4366757, g: 0.48427194, b: 0.5645252, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -912,24 +912,24 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.1
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0.5
-  offsetStartAngle: 0
-  rotationFromOffset: -45
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
-  rotationSpeed: 90
-  rotationRangeMin: 0
-  rotationRangeMax: 360
-  pingPong: 0
-  spawnRotations:
+  firingDirections:
+  - -90
   - 0
   - 90
   - 180
-  - -90
+  rotationSpeed: 90
+  initialRotation: 0
+  rotationRangeMin: 0
+  rotationRangeMax: 360
+  pingPong: 0
   coneStreams: 3
   coneAngle: 30
   coneTipWidth: 0
   sweepSpeed: 0
+  initialAngle: -60
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0
@@ -1048,21 +1048,21 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.1
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0.75}
   offsetRadius: 0
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
+  firingDirections:
+  - 0
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 0
   coneStreams: 1
   coneAngle: 0
   coneTipWidth: 0
   sweepSpeed: 0
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 1
@@ -1083,22 +1083,22 @@ MonoBehaviour:
   projectileSource: {fileID: 146476522}
   fireRate: 1
   startDelay: 1
+  editorColor: {r: 0, g: 0, b: 1, a: 1}
   centerOffset: {x: 0, y: 0, z: -0.75}
   offsetRadius: 1
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 0, g: 0, b: 1, a: 1}
+  firingDirections:
+  - -45
+  - 45
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - -45
-  - 45
   coneStreams: 4
   coneAngle: 45
   coneTipWidth: 1.5
   sweepSpeed: 0
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0
@@ -1238,24 +1238,24 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.05
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
+  firingDirections:
+  - 0
+  - -75
+  - -90
+  - -105
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 0
-  - 75
-  - 90
-  - 105
   coneStreams: 1
   coneAngle: 0
   coneTipWidth: 0
   sweepSpeed: 120
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0
@@ -1339,24 +1339,24 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.05
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
+  firingDirections:
+  - 0
+  - 75
+  - 90
+  - 105
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 0
-  - -75
-  - -90
-  - -105
   coneStreams: 1
   coneAngle: 0
   coneTipWidth: 0
   sweepSpeed: -120
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0
@@ -1481,16 +1481,10 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.1
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0.5
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
-  rotationSpeed: 22.5
-  rotationRangeMin: 0
-  rotationRangeMax: 360
-  pingPong: 0
-  spawnRotations:
+  firingDirections:
   - -135
   - -90
   - -45
@@ -1499,10 +1493,16 @@ MonoBehaviour:
   - 90
   - 135
   - 180
+  rotationSpeed: 22.5
+  initialRotation: 0
+  rotationRangeMin: 0
+  rotationRangeMax: 360
+  pingPong: 0
   coneStreams: 1
   coneAngle: 15
   coneTipWidth: 0
   sweepSpeed: 22.5
+  initialAngle: 0
   sweepRangeMin: -22.5
   sweepRangeMax: 22.5
   burstFire: 0
@@ -1782,22 +1782,22 @@ MonoBehaviour:
   projectileSource: {fileID: 146476522}
   fireRate: 0.3
   startDelay: 0
+  editorColor: {r: 0, g: 0, b: 1, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0.35
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 0, g: 0, b: 1, a: 1}
+  firingDirections:
+  - -90
+  - 90
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 90
-  - -90
   coneStreams: 3
   coneAngle: 40
   coneTipWidth: 0.5
   sweepSpeed: 0
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 1
@@ -1946,21 +1946,21 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.2
   startDelay: 0
-  centerOffset: {x: 0, y: 0, z: 0.37}
-  offsetRadius: 0
-  offsetStartAngle: 0
-  rotationFromOffset: 0
   editorColor: {r: 1, g: 0, b: 0, a: 1}
+  centerOffset: {x: 0, y: 0, z: 0.25}
+  offsetRadius: 0
+  firingDirections:
+  - 0
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 0
   coneStreams: 2
   coneAngle: 0
   coneTipWidth: 0.95
   sweepSpeed: 0
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0
@@ -2012,21 +2012,21 @@ MonoBehaviour:
   projectileSource: {fileID: 545309168}
   fireRate: 0.2
   startDelay: 0
+  editorColor: {r: 1, g: 0, b: 0, a: 1}
   centerOffset: {x: 0, y: 0, z: 0}
   offsetRadius: 0
-  offsetStartAngle: 0
-  rotationFromOffset: 0
-  editorColor: {r: 1, g: 0, b: 0, a: 1}
+  firingDirections:
+  - 0
   rotationSpeed: 0
+  initialRotation: 0
   rotationRangeMin: 0
   rotationRangeMax: 360
   pingPong: 0
-  spawnRotations:
-  - 0
   coneStreams: 1
   coneAngle: 0
   coneTipWidth: 0
   sweepSpeed: 0
+  initialAngle: 0
   sweepRangeMin: -30
   sweepRangeMax: 30
   burstFire: 0

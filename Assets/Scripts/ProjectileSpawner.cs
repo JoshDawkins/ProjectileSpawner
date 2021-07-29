@@ -13,6 +13,9 @@ public class ProjectileSpawner : MonoBehaviour
 	[SerializeField]
 	[Min(0)]
 	private float startDelay = 0;
+	[SerializeField]
+	[ColorUsage(showAlpha: false)]
+	private Color editorColor = Color.red;
 
 	#region OFFSET
 	[Header("Offset")]
@@ -21,13 +24,14 @@ public class ProjectileSpawner : MonoBehaviour
 	[SerializeField]
 	[Min(0)]
 	private float offsetRadius = 0;
+	#endregion OFFSET
+
+	#region MULTIDIRECTIONAL FIRE
+	[Space]
 	[SerializeField]
 	[Range(-180, 180)]
-	private float offsetStartAngle = 0,
-		rotationFromOffset = 0;
-	[SerializeField]
-	private Color editorColor = Color.red;
-	#endregion OFFSET
+	private float[] firingDirections = { 0 };
+	#endregion MULTIDIRECTIONAL FIRE
 
 	#region ROTATION
 	[Header("Rotation")]
@@ -36,18 +40,14 @@ public class ProjectileSpawner : MonoBehaviour
 	private float rotationSpeed = 0;
 	[SerializeField]
 	[Range(-360, 360)]
+	private float initialRotation = 0;
+	[SerializeField]
+	[Range(-360, 360)]
 	private float rotationRangeMin = 0,
 		rotationRangeMax = 360;
 	[SerializeField]
 	private bool pingPong = false;
 	#endregion ROTATION
-
-	#region MULTIDIRECTIONAL FIRE
-	[Header("Multidirectional Fire")]
-	[SerializeField]
-	[Range(-180, 180)]
-	private float[] spawnRotations = { 0 };
-	#endregion MULTIDIRECTIONAL FIRE
 
 	#region CONE FIRE
 	[Header("Cone Fire")]
@@ -69,6 +69,9 @@ public class ProjectileSpawner : MonoBehaviour
 	private float sweepSpeed = 0;
 	[SerializeField]
 	[Range(-360, 360)]
+	private float initialAngle = 0;
+	[SerializeField]
+	[Range(-360, 360)]
 	private float sweepRangeMin = -30,
 		sweepRangeMax = 30;
 	#endregion SWEEP FIRE
@@ -86,9 +89,16 @@ public class ProjectileSpawner : MonoBehaviour
 	#endregion BURST FIRE
 	#endregion SERIALIZED FIELDS
 
-	#region SETUP
+	//Some variables that will be calculated and used by the coroutine, and may be read to draw gizmos
+	private Quaternion rotation;
+	private int shotsThisBurst = 0;
+	private float currentRotation,
+		currentSweepAngle;
+
+	//Stores the currently running coroutine
 	private Coroutine shootingCoroutine;
 
+	#region SETUP
 	private void OnEnable() {
 		shootingCoroutine = StartCoroutine(Shoot());
 	}
@@ -103,11 +113,11 @@ public class ProjectileSpawner : MonoBehaviour
 		if (startDelay > 0)
 			yield return new WaitForSeconds(startDelay);
 
-		//Instantiate some variables to use
-		Quaternion rotation;
-		int shotsThisBurst = 0;
-		float currentRotation = offsetStartAngle,
-			currentSweepAngle = rotationFromOffset;
+		//Initial values
+		currentRotation = initialRotation;
+		currentSweepAngle = initialAngle;
+		if (burstFire)
+			shotsThisBurst = shotsPerBurst;
 
 		//Just keep shooting forever until OnDisable stops the coroutine
 		while (true) {
@@ -126,7 +136,7 @@ public class ProjectileSpawner : MonoBehaviour
 
 			//Rotation
 			if (rotationSpeed == 0) {
-				currentRotation = offsetStartAngle;
+				currentRotation = initialRotation;
 			} else {
 				currentRotation += rotationSpeed * fireRate;
 
@@ -152,7 +162,7 @@ public class ProjectileSpawner : MonoBehaviour
 
 			//Sweep
 			if (sweepSpeed == 0) {
-				currentSweepAngle = rotationFromOffset;
+				currentSweepAngle = initialAngle;
 			} else {
 				currentSweepAngle += sweepSpeed * fireRate;
 
@@ -168,13 +178,13 @@ public class ProjectileSpawner : MonoBehaviour
 			}
 
 			//Fire the projectiles
-			foreach (float rot in spawnRotations)
+			foreach (float rot in firingDirections)
 				FireOneDirection(rotation * Quaternion.Euler(0, rot, 0), currentSweepAngle);
 
 			//Delay before the next shot
-			if (burstFire && ++shotsThisBurst >= shotsPerBurst) {
+			if (burstFire && --shotsThisBurst < 1) {
+				shotsThisBurst = shotsPerBurst;
 				yield return new WaitForSeconds(timeBetweenBursts);
-				shotsThisBurst = 0;
 			} else
 				yield return new WaitForSeconds(fireRate);
 		}
@@ -201,18 +211,65 @@ public class ProjectileSpawner : MonoBehaviour
 	}
 
 	private void OnDrawGizmosSelected() {
+		//Ensure needed values are set when the coroutine isn't running, such as when the editor isn't playing
+		if (shootingCoroutine == null) {
+			currentRotation = initialRotation;
+			currentSweepAngle = initialAngle;
+			rotation = Quaternion.Euler(0, currentRotation, 0);
+		}
+
+		//Set drawing color for the gizmos
 		Gizmos.color = editorColor;
 
+		//Calculate a few things
 		var center = transform.position + centerOffset;
-		var radVec = Vector3.forward * offsetRadius;
+		var radius = Vector3.forward * offsetRadius;
 		var min = Quaternion.Euler(0, rotationRangeMin, 0);
 		var max = Quaternion.Euler(0, rotationRangeMax, 0);
+		Vector3 drawPos;
+		Quaternion sweepAngle, finalRot;
 
+		//Draw the offset position and radius
 		Gizmos.DrawSphere(center, 0.1f);
 		Gizmos.DrawWireSphere(center, offsetRadius);
-		Gizmos.DrawSphere(center + (Quaternion.Euler(0, offsetStartAngle, 0) * radVec), 0.05f);
 
-		Gizmos.DrawLine(center + (min * (radVec + Vector3.forward * -0.2f)), center + (min * (radVec + Vector3.forward * 0.2f)));
-		Gizmos.DrawLine(center + (max * (radVec + Vector3.forward * -0.2f)), center + (max * (radVec + Vector3.forward * 0.2f)));
+		//Display the number of shots left in this burst if burst fire is enabled
+#if UNITY_EDITOR
+		if (burstFire) {
+			if (shootingCoroutine == null)
+				shotsThisBurst = shotsPerBurst;
+
+			GUIStyle style = new GUIStyle();
+			style.normal.textColor = editorColor;
+			UnityEditor.Handles.Label(center + transform.right * 0.15f, shotsThisBurst.ToString(), style);
+		}
+#endif
+
+		//Draw rotation limits
+		Gizmos.DrawLine(center + (min * (radius + Vector3.forward * -0.2f)), center + (min * (radius + Vector3.forward * 0.2f)));
+		Gizmos.DrawLine(center + (max * (radius + Vector3.forward * -0.2f)), center + (max * (radius + Vector3.forward * 0.2f)));
+
+		//Draw each spawn position and its shooting direction
+		foreach (float rot in firingDirections) {
+			finalRot = rotation * Quaternion.Euler(0, rot, 0);
+			drawPos = center + (finalRot * radius);
+			sweepAngle = transform.rotation * finalRot * Quaternion.Euler(0, currentSweepAngle, 0);
+
+			if (coneStreams == 1) {
+				Gizmos.DrawSphere(drawPos, 0.05f);
+				Gizmos.DrawLine(drawPos, drawPos + (sweepAngle * Vector3.forward * 0.3f));
+			} else {
+				float per = coneTipWidth / (coneStreams - 1),
+					halfWidth = coneTipWidth / 2,
+					anglePer = coneAngle / (coneStreams - 1),
+					halfAngle = coneAngle / 2;
+				Vector3 finalPos;
+				for (int i = 0; i < coneStreams; i++) {
+					finalPos = drawPos + (finalRot * Vector3.right * (per * i - halfWidth));
+					Gizmos.DrawSphere(finalPos, 0.05f);
+					Gizmos.DrawLine(finalPos, finalPos + (sweepAngle * Quaternion.Euler(0, anglePer * i - halfAngle, 0) * Vector3.forward * 0.3f));
+				}
+			}
+		}
 	}
 }
